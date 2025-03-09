@@ -1,0 +1,41 @@
+name: Build & Release Modpack
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node (optional if needed) or other environment if required
+
+      # Zip the modpack folder into pack.zip
+      - name: Zip modpack folder
+        run: |
+          cd modpack
+          zip -r ../pack.zip .
+      
+      # Create a GitHub release (or update the latest release) and upload the modpack zip as an asset
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest Modpack Release
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pack.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
