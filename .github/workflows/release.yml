@@ -2,37 +2,41 @@ name: Build & Release Modpack
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*' # Triggers when pushing tags like v1.0, v2.3.4, etc.
 
 jobs:
   build:
+    name: Create Release
     runs-on: ubuntu-latest
     steps:
       # Checkout the repository
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Set up Node (optional if needed) or other environment if required
+        uses: actions/checkout@v4
 
       # Zip the modpack folder into pack.zip
       - name: Zip modpack folder
         run: |
           cd modpack
           zip -r ../pack.zip .
-      
-      # Create a GitHub release (or update the latest release) and upload the modpack zip as an asset
+
+      # Create a GitHub Release
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: latest
-          name: Latest Modpack Release
-          draft: false
-          prerelease: false
+        uses: comnoco/create-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            Changes in this Release:
+            - Updated mods and configs
+            - Improvements and bug fixes
+          draft: false
+          prerelease: false
 
+      # Upload the ZIP file to the release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
